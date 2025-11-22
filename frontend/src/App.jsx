@@ -21,6 +21,7 @@ import CheckOut from './pages/CheckOut';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
+import AdminOrderDetails from './pages/AdminOrderDetailsPage';
 
 
 /**
@@ -90,6 +91,7 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/ordersDetails" element={<AdminOrderDetails />} />
         </Route>
 
         {/* Fallback Route */}
