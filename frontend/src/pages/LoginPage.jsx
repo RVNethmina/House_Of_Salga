@@ -17,8 +17,8 @@ const LoginPage = () => {
     event.preventDefault();
     setLoading(true);
     try {
-      const success = await customerLogin(email, password);
-      if (success) {
+      const response = await customerLogin(email, password);
+      if (response.success) {
         toast.success('Login successful! Redirecting...');
         navigate('/profile'); 
       } else {
@@ -33,6 +33,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <title>Login </title>
       <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-xl shadow-lg">
         {/* Header */}
         <div className="text-center">

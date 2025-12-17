@@ -1,5 +1,5 @@
 import express from 'express';
-import { loginUser, registerUser, adminLogin, getProfile, verifyAdmin } from '../controllers/userController.js';
+import { loginUser, registerUser, adminLogin, getProfile, verifyAdmin , updateUserProfile} from '../controllers/userController.js';
 import upload from '../middleware/multer.js';
 import { authUser, authAdmin } from '../middleware/auth.js';
 
@@ -13,5 +13,7 @@ userRouter.post('/admin/login', adminLogin);
 // Protected Routes (Require Token)
 userRouter.get('/verify', authUser, getProfile); // For Customer context
 userRouter.get('/admin/verify', authAdmin, verifyAdmin); // For Admin context
+
+userRouter.put('/update-profile', authUser, updateUserProfile);
 
 export default userRouter;

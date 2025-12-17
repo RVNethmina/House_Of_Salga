@@ -23,7 +23,7 @@ const loginUser = async (req, res) => {
 
         if (isMatch) {
             const token = createToken(user._id);
-            res.json({ success: true, token, user: { name: user.name, email: user.emai } });
+            res.status(200).json({ success: true, token, user: { name: user.name, email: user.email } });
         } else {
             res.status(401).json({ success: false, message: "Invalid credentials" });
         }
@@ -91,6 +91,37 @@ const adminLogin = async (req, res) => {
     }
 };
 
+// Route: Update User Profile
+const updateUserProfile = async (req, res) => {
+    try {
+        // 1. Get the ID from the middleware (added by authUser)
+        // Note: authUser adds it to req.body.userId
+        const { userId, name, email } = req.body; 
+
+        if (!name || !email) {
+            return res.status(400).json({ success: false, message: "Name and Email are required" });
+        }
+
+        // 2. Find the user and update
+        // { new: true } returns the updated document instead of the old one
+        const updatedUser = await userModel.findByIdAndUpdate(
+            userId, 
+            { name, email }, 
+            { new: true } 
+        ).select('-password'); // Exclude password from the response
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.json({ success: true, message: "Profile Updated", user: updatedUser });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // Route: Verify Customer Token (Used by AuthContext)
 const getProfile = async (req, res) => {
     try {
@@ -116,4 +147,4 @@ const verifyAdmin = async (req, res) => {
 }
 
 
-export { loginUser, registerUser, adminLogin, getProfile, verifyAdmin };
+export { loginUser, registerUser, adminLogin, getProfile, verifyAdmin , updateUserProfile};

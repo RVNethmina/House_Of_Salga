@@ -12,7 +12,8 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState("visitor");
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000/api';
+  const backendUrl =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:4000/api";
 
   // Check for tokens when the app starts
   useEffect(() => {
@@ -25,20 +26,17 @@ export const AuthProvider = ({ children }) => {
         if (localAToken) {
           const response = await axios.get(`${backendUrl}/auth/admin/verify`);
           setUser(response.data.user);
-          setRole('admin');
-
+          setRole("admin");
         } else if (localCToken) {
-          
           const response = await axios.get(`${backendUrl}/auth/verify`);
           setUser(response.data.user);
-          setRole('customer');
-
+          setRole("customer");
         } else {
           setRole("visitor");
         }
       } catch (error) {
         console.error("Token validation failed", error);
-        logout(); 
+        logout();
       } finally {
         setIsAuthLoading(false);
       }
@@ -47,7 +45,6 @@ export const AuthProvider = ({ children }) => {
     validateTokens();
   }, []);
 
-  
   const customerLogin = async (email, password) => {
     try {
       // 1. MAKE THE REQUEST DIRECTLY HERE
@@ -65,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       setRole("customer");
 
-      return true; // Success!
+      return response.data;
     } catch (error) {
       console.error("Login Error:", error);
       toast.error(error.response?.data?.message || "Login failed");
@@ -97,16 +94,42 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      await axios.post(`${backendUrl}/auth/register`, {
+      const response = await axios.post(`${backendUrl}/auth/register`, {
         name,
         email,
         password,
       });
 
-      return true;
+      return response.data;
     } catch (error) {
       console.error("Registration Error:", error);
-      throw error; 
+      throw error;
+    }
+  };
+
+  const updateProfile = async (name, email) => {
+    try {
+      if (!cToken) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await axios.put(
+        `${backendUrl}/auth/update-profile`,
+        {
+          name,
+          email,
+        },
+        { headers: { Authorization: `Bearer ${cToken}` } }
+      );
+      setUser((prev) => ({
+        ...prev, // Copy EVERYTHING from the old object (id, name, email, image)
+        name, // Overwrite name
+        email, // Overwrite email
+      }));
+      return response.data;
+    } catch (error) {
+      console.error("Registration Error:", error);
+      throw error;
     }
   };
 
@@ -117,7 +140,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("cToken");
     localStorage.removeItem("aToken");
     setRole("visitor");
-    
   };
 
   const authValue = {
@@ -130,6 +152,7 @@ export const AuthProvider = ({ children }) => {
     adminLogin,
     register,
     logout,
+    updateProfile,
   };
 
   return (
@@ -137,7 +160,6 @@ export const AuthProvider = ({ children }) => {
     // 2. 'value={authValue}' is the specific data we are broadcasting (user, login function, etc.).
     // Any child component can tune in and read this 'value'.
     <AuthContext.Provider value={authValue}>
-      
       {/* 3. The Logic Check: !isAuthLoading && children
         - isAuthLoading starts as true while we check if the user is logged in (checking localStorage).
         - We DO NOT want to render the app (children) until we know for sure if they are logged in.
@@ -145,7 +167,6 @@ export const AuthProvider = ({ children }) => {
         - So, we only render '{children}' (the rest of your App) when loading is finished (!isAuthLoading).
       */}
       {!isAuthLoading && children}
-
     </AuthContext.Provider>
   );
 };
