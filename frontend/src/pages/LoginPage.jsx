@@ -8,19 +8,19 @@ import { HiUser } from 'react-icons/hi'; // Customer icon
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [ showPassword, setShowPassWord ] = useState(false);
   const [loading, setLoading] = useState(false);
   const { customerLogin } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
     try {
-      // Use the mock login function from AuthContext
       const success = await customerLogin(email, password);
       if (success) {
         toast.success('Login successful! Redirecting...');
-        navigate('/profile'); // Redirect to customer profile
+        navigate('/profile'); 
       } else {
         toast.error('Login failed. Please check your credentials.');
       }
@@ -70,7 +70,7 @@ const LoginPage = () => {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 className="appearance-none block w-full px-3 py-3 pl-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
                 placeholder="you@example.com"
               />
@@ -92,15 +92,22 @@ const LoginPage = () => {
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={ showPassword ?  "text" : "password" }
                 autoComplete="current-password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 className="appearance-none block w-full px-3 py-3 pl-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-fuchsia-500 focus:border-fuchsia-500 sm:text-sm"
                 placeholder="••••••••"
               />
             </div>
+            <button 
+              className=""
+              onClick={ () => {
+                setShowPassWord(!showPassword)
+              }}>
+              { showPassword ? "Hide" : "Show"}
+            </button>
           </div>
 
           {/* Remember Me & Forgot Password */}

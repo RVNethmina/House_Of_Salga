@@ -1,101 +1,123 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-// In a real app, you'd import your api/authService
-// import { apiVerifyCustomerToken, apiVerifyAdminToken } from '../services/authService';
+import axios from "axios";
+import { createContext, useState, useEffect, useContext } from "react";
+import { toast } from "react-toastify";
 
 // Create the context
 export const AuthContext = createContext(null);
 
-// Create the provider component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [cToken, setCToken] = useState(() => localStorage.getItem('cToken'));
-  const [aToken, setAToken] = useState(() => localStorage.getItem('aToken'));
-  const [role, setRole] = useState('visitor'); // 'visitor', 'customer', 'admin'
+  const [cToken, setCToken] = useState(() => localStorage.getItem("cToken"));
+  const [aToken, setAToken] = useState(() => localStorage.getItem("aToken"));
+  const [role, setRole] = useState("visitor");
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  // Check for tokens on initial app load
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000/api';
+
+  // Check for tokens when the app starts
   useEffect(() => {
     const validateTokens = async () => {
       setIsAuthLoading(true);
-      const localCToken = localStorage.getItem('cToken');
-      const localAToken = localStorage.getItem('aToken');
+      const localCToken = localStorage.getItem("cToken");
+      const localAToken = localStorage.getItem("aToken");
 
-      // Admin role takes precedence in case both tokens exist (e.g., a dev)
-      if (localAToken) {
-        // In a real app, you'd verify the token with your backend here
-        // const { isValid, userData } = await apiVerifyAdminToken(localAToken);
-        // if (isValid) {
-        //   setAToken(localAToken);
-        //   setUser(userData);
-        //   setRole('admin');
-        // } else {
-        //   localStorage.removeItem('aToken');
-        // }
+      try {
+        if (localAToken) {
+          const response = await axios.get(`${backendUrl}/auth/admin/verify`);
+          setUser(response.data.user);
+          setRole('admin');
 
-        // --- Mock behavior for now ---
-        setUser({ name: 'Admin User' }); // Mock user
-        setRole('admin');
-        // --- End Mock ---
-      } else if (localCToken) {
-        // In a real app, you'd verify the token with your backend here
-        // const { isValid, userData } = await apiVerifyCustomerToken(localCToken);
-        // if (isValid) {
-        //   setCToken(localCToken);
-        //   setUser(userData);
-        //   setRole('customer');
-        // } else {
-        //   localStorage.removeItem('cToken');
-        // }
+        } else if (localCToken) {
+          
+          const response = await axios.get(`${backendUrl}/auth/verify`);
+          setUser(response.data.user);
+          setRole('customer');
 
-        // --- Mock behavior for now ---
-        setUser({ name: 'Customer User' }); // Mock user
-        setRole('customer');
-        // --- End Mock ---
-      } else {
-        setRole('visitor');
+        } else {
+          setRole("visitor");
+        }
+      } catch (error) {
+        console.error("Token validation failed", error);
+        logout(); 
+      } finally {
+        setIsAuthLoading(false);
       }
-      setIsAuthLoading(false);
     };
 
     validateTokens();
   }, []);
 
-  // --- Mock Login Functions (Replace with your API calls) ---
-
-  // Mock Customer Login
+  
   const customerLogin = async (email, password) => {
-    // const { user, token } = await api.post('/auth/customer/login', { email, password });
-    const mockToken = 'mock-customer-token-12345';
-    const mockUser = { name: 'Test Customer', email };
+    try {
+      // 1. MAKE THE REQUEST DIRECTLY HERE
+      const response = await axios.post(`${backendUrl}/auth/login`, {
+        email,
+        password,
+      });
 
-    localStorage.setItem('cToken', mockToken);
-    setCToken(mockToken);
-    setUser(mockUser);
-    setRole('customer');
-    return true; // Indicate success
+      // 2. GET DATA FROM RESPONSE
+      const { token, user } = response.data;
+
+      // 3. UPDATE STATE
+      localStorage.setItem("cToken", token);
+      setCToken(token);
+      setUser(user);
+      setRole("customer");
+
+      return true; // Success!
+    } catch (error) {
+      console.error("Login Error:", error);
+      toast.error(error.response?.data?.message || "Login failed");
+      return false; // Failed
+    }
   };
 
-  // Mock Admin Login
   const adminLogin = async (email, password) => {
-    // const { user, token } = await api.post('/auth/admin/login', { email, password });
-    const mockToken = 'mock-admin-token-67890';
-    const mockUser = { name: 'Admin User', email };
+    try {
+      const response = await axios.post(`${backendUrl}/auth/admin/login`, {
+        email,
+        password,
+      });
 
-    localStorage.setItem('aToken', mockToken);
-    setAToken(mockToken);
-    setUser(mockUser);
-    setRole('admin');
-    return true; // Indicate success
+      const { token, user } = response.data;
+
+      localStorage.setItem("aToken", token);
+      setAToken(token);
+      setUser(user);
+      setRole("admin");
+
+      return true;
+    } catch (error) {
+      console.error("Admin Login Error:", error);
+      toast.error(error.response?.data?.message || "Admin login failed");
+      return false;
+    }
   };
 
-  // Logout function
+  const register = async (name, email, password) => {
+    try {
+      await axios.post(`${backendUrl}/auth/register`, {
+        name,
+        email,
+        password,
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Registration Error:", error);
+      throw error; 
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setCToken(null);
     setAToken(null);
-    localStorage.removeItem('cToken');
-    localStorage.removeItem('aToken');
-    setRole('visitor');
+    localStorage.removeItem("cToken");
+    localStorage.removeItem("aToken");
+    setRole("visitor");
+    
   };
 
   const authValue = {
@@ -106,21 +128,41 @@ export const AuthProvider = ({ children }) => {
     isAuthLoading,
     customerLogin,
     adminLogin,
+    register,
     logout,
   };
 
   return (
+    // 1. AuthContext.Provider is the actual component that "broadcasts" the data.
+    // 2. 'value={authValue}' is the specific data we are broadcasting (user, login function, etc.).
+    // Any child component can tune in and read this 'value'.
     <AuthContext.Provider value={authValue}>
+      
+      {/* 3. The Logic Check: !isAuthLoading && children
+        - isAuthLoading starts as true while we check if the user is logged in (checking localStorage).
+        - We DO NOT want to render the app (children) until we know for sure if they are logged in.
+        - If we rendered too early, the user might see the "Login" button flash for a second even if they are already logged in.
+        - So, we only render '{children}' (the rest of your App) when loading is finished (!isAuthLoading).
+      */}
       {!isAuthLoading && children}
+
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the AuthContext
+// This is a "Custom Hook". It's a shortcut function for other pages to use.
 export const useAuth = () => {
+  // 1. useContext is a React tool that says: "Go find the nearest AuthProvider above me."
+  // 2. It grabs the 'value' object (user, login, logout, etc.) from that Provider.
   const context = useContext(AuthContext);
+
+  // 3. Safety Check:
+  // If you try to use useAuth() in a component that is NOT wrapped inside <AuthProvider>,
+  // 'context' will be null. This throws an error to warn the developer.
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
+
+  // 4. Return the data (user, token, login function, etc.) to the component that called this hook.
   return context;
 };

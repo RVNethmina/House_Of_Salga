@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/mongoDb.js';
 import connectCloudinary from './config/cloudinary.js';
-
+import userRouter from './routes/userRoute.js';
 
 // Load environment variables
 dotenv.config();
@@ -40,10 +40,7 @@ app.get('/api', (req, res) => {
 });
 
 // Main API routes
-// app.use('/api/auth', authRoutes);
-// app.use('/api/products', productRoutes);
-// app.use('/api/orders', orderRoutes);
-// app.use('/api/payment', paymentRoutes);
+app.use('/api/auth', userRouter);
 
 // --- Global Error Handling ---
 app.use((err, req, res, next) => {

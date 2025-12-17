@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
 
       {/* Main content area */}
       {/* 'flex-grow' makes this element take up all available space, pushing the footer down */}
-      <main className="flex-grow pt-16"> 
+      <main className="grow pt-16"> 
         {/* pt-16 is placeholder for navbar height. Adjust as needed. */}
         {children}
       </main>
