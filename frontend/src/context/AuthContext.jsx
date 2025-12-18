@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       setRole("admin");
 
-      return true;
+      return response.data;
     } catch (error) {
       console.error("Admin Login Error:", error);
       toast.error(error.response?.data?.message || "Admin login failed");
@@ -153,6 +153,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    backendUrl
   };
 
   return (

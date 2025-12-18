@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { MdOutlineEmail, MdOutlineLock } from 'react-icons/md';
 import { HiBuildingOffice2 } from 'react-icons/hi2'; // Admin icon
@@ -17,8 +17,8 @@ const AdminLoginPage = () => {
     setLoading(true);
     try {
       // Use the mock login function from AuthContext
-      const success = await adminLogin(email, password);
-      if (success) {
+      const response = await adminLogin(email, password);
+      if (response.success) {
         toast.success('Admin login successful! Redirecting...');
         navigate('/admin/dashboard'); // Redirect to admin dashboard
       } else {
@@ -33,6 +33,7 @@ const AdminLoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <title>Admin Login</title>
       <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-xl shadow-lg">
         {/* Header */}
         <div className="text-center">

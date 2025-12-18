@@ -4,6 +4,7 @@ import cors from 'cors';
 import connectDB from './config/mongoDb.js';
 import connectCloudinary from './config/cloudinary.js';
 import userRouter from './routes/userRoute.js';
+import productRouter from './routes/productRoute.js';
 
 // Load environment variables
 dotenv.config();
@@ -41,6 +42,7 @@ app.get('/api', (req, res) => {
 
 // Main API routes
 app.use('/api/auth', userRouter);
+app.use('/api/product', productRouter);
 
 // --- Global Error Handling ---
 app.use((err, req, res, next) => {

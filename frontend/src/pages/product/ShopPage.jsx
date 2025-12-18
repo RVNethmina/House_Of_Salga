@@ -1,41 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { useProducts } from '../context/ProductContext';
-import ProductCard from '../components/ProductCard';
-import { FaFilter, FaSearch, FaTimes } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { useProducts } from "../../context/ProductContext";
+import ProductCard from "./ProductCard";
+import { FaFilter, FaSearch, FaTimes } from "react-icons/fa";
+
+
 
 const ShopPage = () => {
   const { products, loading } = useProducts();
   const [filteredProducts, setFilteredProducts] = useState([]);
-  
+
   // Filters State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortOption, setSortOption] = useState('default');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortOption, setSortOption] = useState("default");
   const [showFilters, setShowFilters] = useState(false); // Mobile filter toggle
 
   // Categories (Mock - in real app, fetch from API or unique values from products)
-  const categories = ['All', 'Clothing', 'Footwear', 'Accessories'];
+  const categories = ["All", "Clothing", "Footwear", "Accessories"];
 
   // Apply Filters & Sorting
   useEffect(() => {
     let result = [...products];
 
     // 1. Filter by Category
-    if (selectedCategory !== 'All') {
-      result = result.filter(product => product.category === selectedCategory);
-    }
-
-    // 2. Filter by Search Query
-    if (searchQuery) {
-      result = result.filter(product => 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    if (selectedCategory !== "All") {
+      result = result.filter(
+        (product) => product.category === selectedCategory
       );
     }
 
-    // 3. Sort
-    if (sortOption === 'price-low-high') {
+    // 2. Filter by Search Query
+    //This block says: "Go through my list of products. If a product's name contains the letters the user typed (ignoring capitalization), keep it. Throw away the rest."
+    if (searchQuery) {
+      // 1. Only run this if the user actually typed something
+      result = result.filter((product) =>
+        // 2. Take the product's name ("Premium T-Shirt") and make it lowercase ("premium t-shirt")
+        product.name
+          .toLowerCase()
+
+          // 3. Check if it INCLUDES the search query (also lowercased, e.g., "shirt")
+          .includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // 3. Sort Logic
+    // Check which sorting option the user selected from the dropdown
+    if (sortOption === "price-low-high") {
+      // Sort Ascending: Smallest price first
+      // If result is negative, 'a' is smaller and goes first.
       result.sort((a, b) => a.price - b.price);
-    } else if (sortOption === 'price-high-low') {
+    } else if (sortOption === "price-high-low") {
+      // Sort Descending: Largest price first
+      // We swap 'b' and 'a' in the subtraction.
+      // If result is positive, 'b' is larger and goes first.
       result.sort((a, b) => b.price - a.price);
     }
 
@@ -44,19 +61,19 @@ const ShopPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <title>Shop Page</title>
       <div className="max-w-7xl mx-auto">
-        
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <h1 className="text-3xl font-bold text-gray-900">Shop Collection</h1>
-          
+
           {/* Search Bar */}
           <div className="relative w-full md:w-72">
             <input
               type="text"
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent"
             />
             <FaSearch className="absolute left-3 top-3 text-gray-400" />
@@ -64,9 +81,8 @@ const ShopPage = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          
           {/* --- Sidebar Filters (Desktop) & Mobile Toggle --- */}
-          <div className="lg:w-64 flex-shrink-0">
+          <div className="lg:w-64 shrink-0">
             {/* Mobile Filter Button */}
             <button
               className="lg:hidden w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mb-4"
@@ -76,24 +92,32 @@ const ShopPage = () => {
             </button>
 
             {/* Filter Content */}
-            <div className={`${showFilters ? 'block' : 'hidden'} lg:block bg-white p-6 rounded-xl shadow-sm border border-gray-200`}>
+            <div
+              className={`${
+                showFilters ? "block" : "hidden"
+              } lg:block bg-white p-6 rounded-xl shadow-sm border border-gray-200`}
+            >
               <div className="flex justify-between items-center lg:hidden mb-4">
                 <h3 className="font-bold text-gray-900">Filters</h3>
-                <button onClick={() => setShowFilters(false)}><FaTimes /></button>
+                <button onClick={() => setShowFilters(false)}>
+                  <FaTimes />
+                </button>
               </div>
 
               {/* Categories */}
               <div className="mb-8">
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Categories</h3>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                  Categories
+                </h3>
                 <ul className="space-y-2">
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <li key={category}>
                       <button
                         onClick={() => setSelectedCategory(category)}
                         className={`w-full text-left px-2 py-1 rounded transition-colors ${
-                          selectedCategory === category 
-                            ? 'bg-fuchsia-50 text-fuchsia-600 font-medium' 
-                            : 'text-gray-600 hover:bg-gray-50'
+                          selectedCategory === category
+                            ? "bg-fuchsia-50 text-fuchsia-600 font-medium"
+                            : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         {category}
@@ -105,10 +129,12 @@ const ShopPage = () => {
 
               {/* Sort Options */}
               <div>
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Sort By</h3>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                  Sort By
+                </h3>
                 <select
                   value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value)}
+                  onChange={(event) => setSortOption(event.target.value)}
                   className="w-full border-gray-300 rounded-md shadow-sm focus:ring-fuchsia-500 focus:border-fuchsia-500 text-sm p-2"
                 >
                   <option value="default">Featured</option>
@@ -133,9 +159,14 @@ const ShopPage = () => {
               </div>
             ) : (
               <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
-                <button 
-                  onClick={() => {setSearchQuery(''); setSelectedCategory('All');}}
+                <p className="text-gray-500 text-lg">
+                  No products found matching your criteria.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("All");
+                  }}
                   className="mt-4 text-fuchsia-600 font-medium hover:underline"
                 >
                   Clear all filters
@@ -143,7 +174,6 @@ const ShopPage = () => {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>

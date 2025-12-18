@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductContext';
-import ProductCard from '../components/ProductCard'; // Import the new component
+import ProductCard from './product/ProductCard'; // Import the new component
 import { FaShippingFast, FaGem, FaShieldAlt } from 'react-icons/fa';
 
 const HomePage = () => {

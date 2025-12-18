@@ -18,12 +18,12 @@ import Layout from './components/Layout';
 
 // --- Page Imports (These are the actual pages users see) ---
 import HomePage from './pages/HomePage';
-import ShopPage from './pages/ShopPage';
-import ProductDetailsPage from './pages/ProductDetailsPage';
+import ShopPage from './pages/product/ShopPage';
+import ProductDetailsPage from './pages/product/ProductDetailsPage';
 import CartPage from './pages/CartPage';
-import LoginPage from './pages/LoginPage';
+import LoginPage from './pages/login/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
-import AdminLoginPage from './pages/AdminLoginPage';
+import AdminLoginPage from './pages/login/AdminLoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import UserProfile from './pages/UserProfile';
 import OrderHistoryPage from './pages/OrderHistoryPage';
@@ -35,8 +35,9 @@ import ForgetPassWordPage from './pages/ForgetPassWordPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import ReviewsSection from './pages/ReviewsSection';
+import ReviewsSection from './pages/product/ReviewsSection';
 import WishlistPage from './pages/WishList';
+import AddProducts from './pages/product/AddProducts';
 
 /**
  * --- COMPONENT: CustomerRoute ---
@@ -145,6 +146,7 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/products/add" element={<AddProducts />} />
         </Route>
 
         {/* --- FALLBACK ROUTE --- */}

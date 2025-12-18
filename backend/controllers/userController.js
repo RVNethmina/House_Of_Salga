@@ -81,7 +81,7 @@ const adminLogin = async (req, res) => {
         if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
             // Create a token that contains the admin email signature
             const token = jwt.sign(email + process.env.JWT_ADMIN_SECRET, process.env.JWT_ADMIN_SECRET);
-            res.json({ success: true, token, user: { name: "Admin", email: email } });
+            res.status(200).json({ success: true, token, user: { name: "Admin", email: email } });
         } else {
             res.status(401).json({ success: false, message: "Invalid Admin Credentials" });
         }
@@ -143,7 +143,7 @@ const getProfile = async (req, res) => {
 // Route: Verify Admin Token (Used by AuthContext)
 const verifyAdmin = async (req, res) => {
     // If middleware passed, the token is valid
-    res.json({ success: true, user: { name: "Admin", email: process.env.ADMIN_EMAIL } });
+    res.status(200).json({ success: true, user: { name: "Admin", email: process.env.ADMIN_EMAIL } });
 }
 
 

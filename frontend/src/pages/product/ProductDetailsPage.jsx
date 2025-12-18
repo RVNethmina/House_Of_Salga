@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useProducts } from '../context/ProductContext';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useProducts } from '../../context/ProductContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FaStar, FaShoppingCart, FaArrowLeft, FaCheck, FaTruck, FaUndo } from 'react-icons/fa';
 
@@ -93,7 +93,7 @@ const ProductDetailsPage = () => {
               src={product.image} 
               alt={product.name} 
               className="max-h-[500px] w-auto object-contain rounded-lg shadow-sm"
-              onError={(e) => { e.target.src = 'https://placehold.co/500x500/f8f8f8/cccccc?text=Product+Image'; }}
+              onError={(event) => { event.target.src = 'https://placehold.co/500x500/f8f8f8/cccccc?text=Product+Image'; }}
             />
           </div>
 
