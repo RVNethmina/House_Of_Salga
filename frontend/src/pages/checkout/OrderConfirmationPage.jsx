@@ -1,10 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaCheckCircle, FaShoppingBag, FaListAlt } from 'react-icons/fa';
 
 const OrderConfirmationPage = () => {
-  // Generate a random mock Order ID
-  const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+  const location = useLocation();
+  // Retrieve the orderId passed from the Checkout page via state
+  // Fallback to 'Processing...' if accessed directly without state
+  const { orderId } = location.state || { orderId: 'Processing...' };
   
   // Calculate a mock estimated delivery date (7 days from now)
   const deliveryDate = new Date();
@@ -18,6 +20,7 @@ const OrderConfirmationPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <title>Order Success</title>
       <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center border border-gray-100">
         
         {/* Success Icon */}
@@ -36,7 +39,8 @@ const OrderConfirmationPage = () => {
         <div className="bg-gray-50 rounded-lg p-6 mb-8 text-left border border-gray-200">
           <div className="flex justify-between mb-2">
             <span className="text-gray-500 font-medium">Order Number:</span>
-            <span className="text-gray-900 font-bold">{orderId}</span>
+            {/* Display the Real Order ID */}
+            <span className="text-gray-900 font-bold text-fuchsia-600">{orderId}</span>
           </div>
           <div className="flex justify-between mb-4">
             <span className="text-gray-500 font-medium">Est. Delivery:</span>

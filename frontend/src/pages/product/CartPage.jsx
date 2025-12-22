@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import { FaTrash, FaMinus, FaPlus, FaArrowLeft, FaShoppingBag } from 'react-icons/fa';
 
 const CartPage = () => {
@@ -11,6 +11,7 @@ const CartPage = () => {
   const shippingFee = subtotal > 50 ? 0 : 10; // Example: Free shipping over $50
   const total = subtotal + shippingFee;
 
+  // if cart is empty
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -41,6 +42,14 @@ const CartPage = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8 flex items-center">
           Shopping Cart
           <span className="ml-3 text-lg font-medium text-gray-500 bg-gray-200 px-3 py-1 rounded-full">
+            {/* 
+              Calculate total items in cart using reduce()
+              1. We start with a total of 0 (the second argument).
+              2. For each 'item' in the cart, we run the function:
+                 - 'acc' is the accumulated total so far.
+                 - We add the current item's quantity to 'acc'.
+              3. The final result is the sum of all quantities.
+            */}
             {cartItems.reduce((acc, item) => acc + item.quantity, 0)} items
           </span>
         </h1>
@@ -56,10 +65,10 @@ const CartPage = () => {
                     {/* Product Image */}
                     <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                       <img
-                        src={item.image}
+                        src={item.image[0]}
                         alt={item.name}
                         className="h-full w-full object-cover object-center"
-                        onError={(e) => { e.target.src = 'https://placehold.co/100x100/f8f8f8/cccccc?text=No+Image'; }}
+                        onError={(event) => { event.target.src = 'https://placehold.co/100x100/f8f8f8/cccccc?text=No+Image'; }}
                       />
                     </div>
 

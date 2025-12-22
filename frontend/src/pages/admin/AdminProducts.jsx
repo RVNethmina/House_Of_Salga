@@ -1,68 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FaBoxOpen, FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
+import axios from 'axios';
+import { useProducts } from '../../context/ProductContext';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminProducts = () => {
-  // --- Mock Data ---
-  const [products, setProducts] = useState([
-    { 
-      id: 1, 
-      name: 'Premium T-Shirt', 
-      category: 'Clothing', 
-      price: 49.99, 
-      stock: 120, 
-      image: 'https://placehold.co/100x100/fuchsia/white?text=Shirt' 
-    },
-    { 
-      id: 2, 
-      name: 'Lifestyle Sneakers', 
-      category: 'Footwear', 
-      price: 129.99, 
-      stock: 45, 
-      image: 'https://placehold.co/100x100/fuchsia/white?text=Sneakers' 
-    },
-    { 
-      id: 3, 
-      name: 'Designer Handbag', 
-      category: 'Accessories', 
-      price: 399.99, 
-      stock: 12, 
-      image: 'https://placehold.co/100x100/fuchsia/white?text=Handbag' 
-    },
-    { 
-      id: 4, 
-      name: 'Classic Watch', 
-      category: 'Accessories', 
-      price: 199.50, 
-      stock: 30, 
-      image: 'https://placehold.co/100x100/fuchsia/white?text=Watch' 
-    },
-    { 
-      id: 5, 
-      name: 'Summer Hat', 
-      category: 'Accessories', 
-      price: 25.00, 
-      stock: 200, 
-      image: 'https://placehold.co/100x100/fuchsia/white?text=Hat' 
-    },
-  ]);
-
+  const { products } = useProducts();
+  const { aToken } = useAuth();
+  
+  // Local state to handle filtering and optimistic deletions
+  const [list, setList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000/api';
+
+  // Sync local list with context products when they load
+  useEffect(() => {
+    if (products) {
+      setList(products);
+    }
+  }, [products]);
 
   // --- Handlers ---
 
-  const handleDelete = (id) => {
-    // In a real app, you would confirm with the user first
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      const updatedProducts = products.filter(product => product.id !== id);
-      setProducts(updatedProducts);
-      toast.success('Product deleted successfully');
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const response = await axios.post(
+        `${backendUrl}/product/remove`, 
+        { id }, 
+        { headers: { Authorization: `Bearer ${aToken}` } }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        // Remove from local list immediately
+        setList(prev => prev.filter(item => item._id !== id));
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message);
     }
   };
 
   // Filter products based on search
-  const filteredProducts = products.filter(product =>
+  const filteredProducts = list.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -113,22 +100,26 @@ const AdminProducts = () => {
                 <th className="px-6 py-4 font-semibold">Product</th>
                 <th className="px-6 py-4 font-semibold">Category</th>
                 <th className="px-6 py-4 font-semibold">Price</th>
-                <th className="px-6 py-4 font-semibold">Stock</th>
+                <th className="px-6 py-4 font-semibold text-center">Bestseller</th>
                 <th className="px-6 py-4 font-semibold text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-sm">
               {filteredProducts.length > 0 ? (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
+                  <tr key={product._id} className="hover:bg-gray-50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
-                          <img className="h-10 w-10 rounded-full object-cover border border-gray-200" src={product.image} alt="" />
+                          <img 
+                            className="h-10 w-10 rounded-full object-cover border border-gray-200" 
+                            src={product.image[0]} 
+                            alt={product.name} 
+                          />
                         </div>
                         <div className="ml-4">
                           <div className="font-medium text-gray-900">{product.name}</div>
-                          <div className="text-gray-500 text-xs">ID: #{product.id}</div>
+                          <div className="text-gray-500 text-xs">ID: #{product._id.slice(-6)}</div>
                         </div>
                       </div>
                     </td>
@@ -138,22 +129,22 @@ const AdminProducts = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 font-medium text-gray-900">${product.price.toFixed(2)}</td>
-                    <td className="px-6 py-4">
-                      <span className={`font-medium ${product.stock < 20 ? 'text-red-600' : 'text-green-600'}`}>
-                        {product.stock} units
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.bestseller ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>
+                        {product.bestseller ? 'Yes' : 'No'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center space-x-3">
                         <Link 
-                          to={`/admin/products/edit/${product.id}`} 
+                          to={`/admin/products/edit/${product._id}`} 
                           className="text-blue-500 hover:text-blue-700 transition-colors p-1 rounded hover:bg-blue-50"
                           title="Edit"
                         >
                           <FaEdit />
                         </Link>
                         <button 
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product._id)}
                           className="text-red-500 hover:text-red-700 transition-colors p-1 rounded hover:bg-red-50"
                           title="Delete"
                         >
@@ -177,7 +168,7 @@ const AdminProducts = () => {
         {/* Footer / Pagination (Visual Only) */}
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
           <span>
-            Total Inventory Value: <span className="font-medium text-gray-900">${filteredProducts.reduce((acc, p) => acc + (p.price * p.stock), 0).toLocaleString()}</span>
+            Total Inventory Value: <span className="font-medium text-gray-900">${filteredProducts.reduce((acc, p) => acc + (p.price), 0).toLocaleString()}</span>
           </span>
           <span>Showing {filteredProducts.length} items</span>
         </div>

@@ -77,6 +77,7 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <title>{`${product.name} Details Page`}</title>
       <div className="max-w-7xl mx-auto">
         
         {/* Back Link */}
@@ -90,7 +91,7 @@ const ProductDetailsPage = () => {
           {/* Product Image */}
           <div className="lg:w-1/2 bg-gray-100 flex items-center justify-center p-8">
             <img 
-              src={product.image} 
+              src={product.image[0]} 
               alt={product.name} 
               className="max-h-[500px] w-auto object-contain rounded-lg shadow-sm"
               onError={(event) => { event.target.src = 'https://placehold.co/500x500/f8f8f8/cccccc?text=Product+Image'; }}
@@ -129,6 +130,7 @@ const ProductDetailsPage = () => {
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <div className="flex items-center border border-gray-300 rounded-lg w-32">
                   <button 
+                    // Math.max(1, qty - 1) = quantity decrease by 1. and 1 is minimum value.
                     onClick={() => setQty(Math.max(1, qty - 1))}
                     className="px-3 py-2 text-gray-600 hover:bg-gray-100 w-full rounded-l-lg"
                   >

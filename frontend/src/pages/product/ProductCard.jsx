@@ -8,23 +8,23 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const handleAddToCart = (e) => {
-    e.preventDefault(); 
+  const handleAddToCart = (event) => {
+    event.preventDefault(); 
     addToCart(product);
     toast.success(`${product.name} added to cart!`);
   };
 
-  const nextImage = (e) => {
-    e.preventDefault(); // Prevent Link navigation
-    e.stopPropagation();
+  const nextImage = (event) => {
+    event.preventDefault(); // Prevent Link navigation
+    event.stopPropagation();
     if (product.image && product.image.length > 1) {
       setCurrentImageIndex((prev) => (prev + 1) % product.image.length);
     }
   };
 
-  const prevImage = (e) => {
-    e.preventDefault(); // Prevent Link navigation
-    e.stopPropagation();
+  const prevImage = (event) => {
+    event.preventDefault(); // Prevent Link navigation
+    event.stopPropagation();
     if (product.image && product.image.length > 1) {
       setCurrentImageIndex((prev) => (prev - 1 + product.image.length) % product.image.length);
     }
@@ -33,7 +33,7 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   // Use _id because MongoDB uses underscores
-  const productId = product._id || product.id;
+  const productId = product._id;
   const images = product.image || [];
   const hasMultipleImages = images.length > 1;
 

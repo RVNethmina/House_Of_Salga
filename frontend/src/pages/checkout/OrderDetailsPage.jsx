@@ -1,47 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FaArrowLeft, FaBox, FaTruck, FaCreditCard, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaBox, FaTruck, FaCreditCard } from 'react-icons/fa';
+import { useOrders } from '../../context/OrderContext';
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
+  const { orders, getUserOrders, currency } = useOrders();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching order details from API based on ID
-    const fetchOrderDetails = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-
-      // Mock Data
-      const mockOrder = {
-        id: id || '#ORD-123456', // Use ID from URL or fallback
-        date: 'October 25, 2023',
-        status: 'Shipped',
-        total: 189.99,
-        items: [
-          { id: 1, name: 'Premium T-Shirt', price: 49.99, quantity: 2, image: 'https://placehold.co/100x100/fuchsia/white?text=Shirt' },
-          { id: 2, name: 'Lifestyle Sneakers', price: 129.99, quantity: 1, image: 'https://placehold.co/100x100/fuchsia/white?text=Sneakers' },
-        ],
-        shippingAddress: {
-          name: 'John Doe',
-          street: '123 Fashion St, Apt 4B',
-          city: 'New York',
-          state: 'NY',
-          zip: '10001',
-          country: 'USA'
-        },
-        paymentMethod: 'Stripe (Credit Card)',
-        shippingFee: 10.00,
-        subtotal: 229.97 // (49.99*2 + 129.99)
-      };
-      
-      setOrder(mockOrder);
+    const fetchOrderData = async () => {
+      // Ensure we have orders to search through
+      if (orders.length === 0) {
+        await getUserOrders();
+      }
       setLoading(false);
     };
+    
+    fetchOrderData();
+  }, [getUserOrders, orders.length]);
 
-    fetchOrderDetails();
-  }, [id]);
+  useEffect(() => {
+    if (orders.length > 0) {
+      // Find the specific order from the orders array
+      const foundOrder = orders.find(o => o._id === id);
+      setOrder(foundOrder);
+    }
+  }, [id, orders]);
 
   if (loading) {
     return (
@@ -65,8 +51,10 @@ const OrderDetailsPage = () => {
   // Helper for status badge colors
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800';
-      case 'Shipped': return 'bg-blue-100 text-blue-800';
+      case 'Order Placed': return 'bg-blue-100 text-blue-800';
+      case 'Packing': return 'bg-yellow-100 text-yellow-800';
+      case 'Shipped': return 'bg-purple-100 text-purple-800';
+      case 'Out for delivery': return 'bg-indigo-100 text-indigo-800';
       case 'Delivered': return 'bg-green-100 text-green-800';
       case 'Cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -75,6 +63,7 @@ const OrderDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <title>Order Details Page</title>
       <div className="max-w-4xl mx-auto">
         
         {/* Breadcrumb / Back Link */}
@@ -89,10 +78,10 @@ const OrderDetailsPage = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               Order Details
-              <span className="ml-3 text-lg font-normal text-gray-500">#{order.id}</span>
+              <span className="ml-3 text-lg font-normal text-gray-500">#{order._id.slice(-6).toUpperCase()}</span>
             </h1>
             <p className="text-gray-500 mt-1">
-              Placed on <span className="font-medium text-gray-900">{order.date}</span>
+              Placed on <span className="font-medium text-gray-900">{new Date(order.date).toDateString()}</span>
             </p>
           </div>
           <div className="mt-4 md:mt-0">
@@ -113,18 +102,24 @@ const OrderDetailsPage = () => {
                 </h2>
               </div>
               <ul className="divide-y divide-gray-100">
-                {order.items.map((item) => (
-                  <li key={item.id} className="p-6 flex items-start">
+                {order.items.map((item, index) => (
+                  <li key={index} className="p-6 flex items-start">
                     <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-100">
-                      <img src={item.image} alt={item.name} className="h-full w-full object-cover object-center" />
+                      <img 
+                        src={item.image[0]} 
+                        alt={item.name} 
+                        className="h-full w-full object-cover object-center"
+                        onError={(e) => { e.target.src = 'https://placehold.co/100x100/f8f8f8/cccccc?text=No+Image'; }}
+                      />
                     </div>
                     <div className="ml-4 flex-1">
                       <div className="flex justify-between">
                         <h3 className="text-base font-medium text-gray-900">{item.name}</h3>
-                        <p className="text-base font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-base font-bold text-gray-900">{currency}{(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                       <p className="mt-1 text-sm text-gray-500">Qty: {item.quantity}</p>
-                      <p className="text-sm text-gray-500">Unit Price: ${item.price}</p>
+                      {item.size && <p className="text-sm text-gray-500">Size: {item.size}</p>}
+                      <p className="text-sm text-gray-500">Unit Price: {currency}{item.price}</p>
                     </div>
                   </li>
                 ))}
@@ -140,16 +135,14 @@ const OrderDetailsPage = () => {
               <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
               <dl className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <dt className="text-gray-500">Subtotal</dt>
-                  <dd className="font-medium text-gray-900">${order.subtotal.toFixed(2)}</dd>
+                  <dt className="text-gray-500">Items Subtotal</dt>
+                  {/* Assuming amount includes everything. If you stored shipping separately, display it here */}
+                  <dd className="font-medium text-gray-900">{currency}{order.amount.toFixed(2)}</dd>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <dt className="text-gray-500">Shipping</dt>
-                  <dd className="font-medium text-gray-900">${order.shippingFee.toFixed(2)}</dd>
-                </div>
+                
                 <div className="border-t border-gray-100 pt-3 flex justify-between">
-                  <dt className="text-base font-bold text-gray-900">Total</dt>
-                  <dd className="text-xl font-bold text-fuchsia-600">${(order.subtotal + order.shippingFee).toFixed(2)}</dd>
+                  <dt className="text-base font-bold text-gray-900">Total Amount</dt>
+                  <dd className="text-xl font-bold text-fuchsia-600">{currency}{order.amount.toFixed(2)}</dd>
                 </div>
               </dl>
             </div>
@@ -160,10 +153,11 @@ const OrderDetailsPage = () => {
                 <FaTruck className="mr-2 text-gray-400" /> Delivery Info
               </h2>
               <div className="text-sm text-gray-600 space-y-1">
-                <p className="font-medium text-gray-900">{order.shippingAddress.name}</p>
-                <p>{order.shippingAddress.street}</p>
-                <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip}</p>
-                <p>{order.shippingAddress.country}</p>
+                <p className="font-medium text-gray-900">{order.address.firstName} {order.address.lastName}</p>
+                <p>{order.address.street}</p>
+                <p>{order.address.city}, {order.address.state} {order.address.zipcode}</p>
+                <p>{order.address.country}</p>
+                <p className="mt-2">{order.address.phone}</p>
               </div>
             </div>
 
@@ -174,6 +168,11 @@ const OrderDetailsPage = () => {
               </h2>
               <p className="text-sm text-gray-600">
                 Method: <span className="font-medium text-gray-900">{order.paymentMethod}</span>
+              </p>
+              <p className="text-sm text-gray-600">
+                Payment Status: <span className={`font-medium ${order.payment ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {order.payment ? 'Paid' : 'Pending'}
+                </span>
               </p>
             </div>
 

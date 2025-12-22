@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdOutlineEmail, MdOutlineLock, MdPersonOutline } from "react-icons/md";
 import { HiOutlineUserAdd } from "react-icons/hi";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 
 const RegistrationPage = () => {
   const { register } = useContext(AuthContext);

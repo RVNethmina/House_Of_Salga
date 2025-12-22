@@ -20,6 +20,6 @@ productRouter.post('/remove', authAdmin, removeProduct);
 productRouter.get('/list', listProducts);
 
 // Route to Get Single Product (Public)
-productRouter.post('/single', singleProduct);
+productRouter.get('/single/:productId', singleProduct);
 
 export default productRouter;

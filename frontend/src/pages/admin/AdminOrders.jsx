@@ -1,73 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { FaBoxOpen, FaSearch, FaFilter } from 'react-icons/fa';
+import { useOrders } from '../../context/OrderContext';
 
 const AdminOrders = () => {
-  // --- Mock Data ---
-  const [orders, setOrders] = useState([
-    { 
-      id: '#ORD-001', 
-      customer: 'John Doe', 
-      email: 'john@example.com',
-      items: 3, 
-      price: 120.00, 
-      status: 'Pending', 
-      payment: 'Paid',
-      date: '2023-10-25' 
-    },
-    { 
-      id: '#ORD-002', 
-      customer: 'Jane Smith', 
-      email: 'jane@example.com',
-      items: 1, 
-      price: 85.50, 
-      status: 'Shipped', 
-      payment: 'Paid',
-      date: '2023-10-24' 
-    },
-    { 
-      id: '#ORD-003', 
-      customer: 'Mike Ross', 
-      email: 'mike@example.com',
-      items: 5, 
-      price: 210.00, 
-      status: 'Delivered', 
-      payment: 'Paid',
-      date: '2023-10-24' 
-    },
-    { 
-      id: '#ORD-004', 
-      customer: 'Rachel Zane', 
-      email: 'rachel@example.com',
-      items: 2, 
-      price: 45.00, 
-      status: 'Pending', 
-      payment: 'Pending',
-      date: '2023-10-23' 
-    },
-    { 
-      id: '#ORD-005', 
-      customer: 'Harvey Specter', 
-      email: 'harvey@example.com',
-      items: 1, 
-      price: 550.00, 
-      status: 'Cancelled', 
-      payment: 'Refunded',
-      date: '2023-10-22' 
-    },
-  ]);
-
+  
+  const { adminOrders, getAllOrders, updateOrderStatus, currency } = useOrders();
+  const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState('All');
 
-  // --- Handlers ---
+  // Fetch orders on mount
+  useEffect(() => {
+    getAllOrders();
+  }, []);
 
-  const handleStatusChange = (orderId, newStatus) => {
-    // Update local state to reflect change immediately
-    const updatedOrders = orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    );
-    setOrders(updatedOrders);
-    toast.success(`Order ${orderId} updated to ${newStatus}`);
+  // Sync local state when adminOrders changes
+  useEffect(() => {
+    if (adminOrders) {
+      setOrders(adminOrders);
+    }
+  }, [adminOrders]);
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    // Call the context function to update backend
+    await updateOrderStatus(orderId, newStatus);
+    // Local state will update automatically because getAllOrders is called inside updateOrderStatus
   };
 
   // Filter logic
@@ -78,8 +35,10 @@ const AdminOrders = () => {
   // Helper for status badge colors
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Shipped': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Order Placed': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Packing': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Out for delivery': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
       case 'Delivered': return 'bg-green-100 text-green-800 border-green-200';
       case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -89,6 +48,7 @@ const AdminOrders = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-6 lg:p-10">
       <title>Admin Orders</title>
+      
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
         <div>
@@ -114,7 +74,7 @@ const AdminOrders = () => {
 
       {/* Filter Tabs */}
       <div className="flex space-x-2 mb-6 overflow-x-auto pb-2">
-        {['All', 'Pending', 'Shipped', 'Delivered', 'Cancelled'].map((status) => (
+        {['All', 'Order Placed', 'Packing', 'Shipped', 'Out for delivery', 'Delivered', 'Cancelled'].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -148,19 +108,28 @@ const AdminOrders = () => {
             <tbody className="divide-y divide-gray-100 text-sm">
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-gray-900">{order.id}</td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{order.customer}</div>
-                      <div className="text-gray-500 text-xs">{order.email}</div>
+                  <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      #{order._id.slice(-6).toUpperCase()}
                     </td>
-                    <td className="px-6 py-4 text-gray-500">{order.date}</td>
-                    <td className="px-6 py-4 text-gray-500">{order.items} items</td>
-                    <td className="px-6 py-4 font-medium text-gray-900">${order.price.toFixed(2)}</td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-semibold ${order.payment === 'Paid' ? 'text-green-600' : order.payment === 'Refunded' ? 'text-red-500' : 'text-yellow-600'}`}>
-                        {order.payment}
+                      <div className="font-medium text-gray-900">
+                        {order.address.firstName} {order.address.lastName}
+                      </div>
+                      <div className="text-gray-500 text-xs">{order.address.email}</div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {new Date(order.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">{order.items.length} items</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      {currency}{order.amount.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`text-xs font-semibold ${order.payment ? 'text-green-600' : 'text-yellow-600'}`}>
+                        {order.payment ? 'Paid' : 'Pending'}
                       </span>
+                      <div className="text-xs text-gray-400">{order.paymentMethod}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
@@ -170,12 +139,14 @@ const AdminOrders = () => {
                     <td className="px-6 py-4">
                       <select
                         value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
                         className="bg-white border border-gray-300 text-gray-700 text-xs rounded p-1 focus:ring-fuchsia-500 focus:border-fuchsia-500 cursor-pointer"
-                        disabled={order.status === 'Cancelled'}
+                        disabled={order.status === 'Cancelled' || order.status === 'Delivered'}
                       >
-                        <option value="Pending">Pending</option>
+                        <option value="Order Placed">Order Placed</option>
+                        <option value="Packing">Packing</option>
                         <option value="Shipped">Shipped</option>
+                        <option value="Out for delivery">Out for delivery</option>
                         <option value="Delivered">Delivered</option>
                         <option value="Cancelled">Cancelled</option>
                       </select>

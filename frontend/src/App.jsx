@@ -20,21 +20,21 @@ import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/product/ShopPage';
 import ProductDetailsPage from './pages/product/ProductDetailsPage';
-import CartPage from './pages/CartPage';
-import LoginPage from './pages/login/LoginPage';
-import RegistrationPage from './pages/RegistrationPage';
-import AdminLoginPage from './pages/login/AdminLoginPage';
+import CartPage from './pages/product/CartPage';
+import LoginPage from './pages/user/LoginPage';
+import RegistrationPage from './pages/user/RegistrationPage';
+import AdminLoginPage from './pages/user/AdminLoginPage';
 import NotFoundPage from './pages/NotFoundPage';
-import UserProfile from './pages/UserProfile';
-import OrderHistoryPage from './pages/OrderHistoryPage';
-import CheckOut from './pages/CheckOut';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminProducts from './pages/AdminProducts';
-import AdminOrders from './pages/AdminOrders';
-import ForgetPassWordPage from './pages/ForgetPassWordPage';
-import OrderConfirmationPage from './pages/OrderConfirmationPage';
-import OrderDetailsPage from './pages/OrderDetailsPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
+import UserProfile from './pages/user/UserProfile';
+import OrderHistoryPage from './pages/checkout/OrderHistoryPage';
+import CheckOut from './pages/checkout/CheckOut';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminOrders from './pages/admin/AdminOrders';
+import ForgetPassWordPage from './pages/user/ForgetPassWordPage';
+import OrderConfirmationPage from './pages/checkout/OrderConfirmationPage';
+import OrderDetailsPage from './pages/checkout/OrderDetailsPage';
+import ResetPasswordPage from './pages/user/ResetPasswordPage';
 import ReviewsSection from './pages/product/ReviewsSection';
 import WishlistPage from './pages/WishList';
 import AddProducts from './pages/product/AddProducts';
@@ -133,9 +133,9 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/checkout" element={<CheckOut />} />
-          <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-          <Route path="/order-details" element={<OrderDetailsPage />}  />
-          <Route path="/order-history" element={<OrderHistoryPage/>} />
+          <Route path="/order-success" element={<OrderConfirmationPage />} />
+          <Route path="/orders/:id" element={<OrderDetailsPage />}  />
+          <Route path="/orders" element={<OrderHistoryPage/>} />
           <Route path="/product-details" element={<ProductDetailsPage />} />
           <Route path="/wishlist" element={<WishlistPage />}/>
         </Route>
@@ -158,7 +158,7 @@ function App() {
       {/* This component sits here quietly and waits to show popup messages */}
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={1000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick

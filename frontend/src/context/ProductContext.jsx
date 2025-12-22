@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useAuth } from './AuthContext';
 
 // Create the context
 export const ProductContext = createContext(null);
@@ -35,13 +34,14 @@ export const ProductProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
   // Function to get a single product by ID
   const getProductById = (id) => {
-    return products.find(product => product.id === parseInt(id));
+    console.log(id);
+    
+    return products.find(product => product._id === id );
   };
 
   const productValue = {

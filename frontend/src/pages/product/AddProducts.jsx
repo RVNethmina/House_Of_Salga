@@ -3,10 +3,14 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaCloudUploadAlt } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 
 const AddProducts = () => {
   const { aToken , backendUrl } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  const naviagate = useNavigate();
 
   // Form State
   const [name, setName] = useState("");
@@ -63,6 +67,7 @@ const AddProducts = () => {
         setImage4(false);
         setSizes([]);
         setBestseller(false);
+        naviagate('/admin/products');
       } else {
         toast.error(response.data.message);
       }

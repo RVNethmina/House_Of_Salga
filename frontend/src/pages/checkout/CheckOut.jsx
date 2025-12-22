@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { useOrders } from '../../context/OrderContext'
 import { toast } from 'react-toastify';
 import { FaCreditCard, FaMoneyBillWave, FaLock } from 'react-icons/fa';
 
 const CheckOut = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { placeOrder } = useOrders();
   const navigate = useNavigate();
 
-  const [method, setMethod] = useState('cod'); // 'cod' or 'stripe'
+  const [method, setMethod] = useState('cod'); 
   const [loading, setLoading] = useState(false);
   
   // Form State
@@ -26,8 +28,8 @@ const CheckOut = () => {
     phone: ''
   });
 
-  const onChangeHandler = (e) => {
-    const { name, value } = e.target;
+  const onChangeHandler = (event) => {
+    const { name, value } = event.target;
     setFormData(data => ({ ...data, [name]: value }));
   };
 
@@ -37,11 +39,11 @@ const CheckOut = () => {
   const total = subtotal + shippingFee;
 
   // Handle Order Placement
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
+  const handlePlaceOrder = async (event) => {
+    event.preventDefault();
     setLoading(true);
 
-    // Mock API Call simulation
+    
     try {
       // 1. Validate Form (Basic check)
       if (!formData.street || !formData.city || !formData.phone) {
@@ -50,13 +52,21 @@ const CheckOut = () => {
         return;
       }
 
-      // 2. Simulate Network Request
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 2. Call Context Function with Correct Arguments
+      // placeOrder(items, amount, address)
+      let response = false;
 
-      // 3. Success Handling
-      toast.success("Order placed successfully!");
-      clearCart();
-      navigate('/order-success'); // Navigate to confirmation page
+      if(method === 'cod'){
+        response = await placeOrder(cartItems , total , formData);
+      }
+      else{
+        toast.info("Redirecting to Stripe Gateway...(Demo: Processed as COD)");
+      }
+      
+      if (response) {
+        navigate('/order-success');
+      }
+       
       
     } catch (error) {
       console.error(error);
@@ -66,12 +76,7 @@ const CheckOut = () => {
     }
   };
 
-  if (cartItems.length === 0) {
-    // Redirect if cart is empty (prevent direct access)
-    // Using a timeout to ensure render doesn't break
-    setTimeout(() => navigate('/shop'), 0);
-    return null;
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -151,7 +156,7 @@ const CheckOut = () => {
                   {cartItems.map((item) => (
                     <li key={item.id} className="py-4 flex">
                       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                        <img src={item.image} alt={item.name} className="h-full w-full object-cover object-center" />
+                        <img src={item.image[0]} alt={item.name} className="h-full w-full object-cover object-center" />
                       </div>
                       <div className="ml-4 flex flex-1 flex-col">
                         <div>
