@@ -4,6 +4,7 @@ This is the frontend repository for the House of Salaga e-commerce platform. It 
 
 ## Table of Contents
 
+- [Project Status](#project-status)
 - [Core Technologies](#core-technologies)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -14,11 +15,19 @@ This is the frontend repository for the House of Salaga e-commerce platform. It 
   - [Folder Structure](#folder-structure)
   - [State Management (React Context)](#state-management-react-context)
   - [Authentication & Routing](#authentication--routing)
+- [Task Distribution](#task-distribution)
 - [Frontend-Only Development (Mock Data)](#frontend-only-development-mock-data)
   - [How to Test Roles](#how-to-test-roles)
 - [Connecting to the Backend (Next Steps)](#connecting-to-the-backend-next-steps)
-- [Styling](#styling)
+- [Styling & Color Palette](#styling--color-palette)
 - [Available Scripts](#available-scripts)
+
+## Project Status
+
+**Status:** In Development  
+**Mode:** Mock-First Development
+
+This project is currently being built using mock data provided by React Context files (AuthContext, ProductContext). This allows for parallel frontend and backend development. The backend API is not yet connected.
 
 ## Core Technologies
 
@@ -84,7 +93,7 @@ This project is built with a clear separation of concerns.
 ### Folder Structure
 ```
 /frontend
-├── /public/         # Static assets
+├── /public/         # Static assets (favicon, logo.jpg)
 ├── /src/
 │   ├── /assets/     # Images, fonts, etc.
 │   ├── /components/ # Reusable React components (Button, NavBar, ProductCard)
@@ -137,6 +146,10 @@ The `AuthContext` is designed to handle two separate tokens:
 
 The API service in `src/services/api.js` automatically attaches the correct token (`aToken` takes priority) to all outgoing requests.
 
+## Task Distribution
+
+All frontend pages and components have been assigned to the development team. Please refer to the `task_distribution.csv` file in the repository's root directory for a detailed breakdown of assignments, responsibilities, and status.
+
 ## Frontend-Only Development (Mock Data)
 
 As of now, the backend is not connected. The `AuthContext` and `ProductContext` are set up with mock data and mock functions to allow for full frontend development and testing.
@@ -185,12 +198,37 @@ When the backend API is ready, follow these steps to connect it:
 
 4. **Update `src/services/`:** Build out the `authService.js`, `productService.js`, etc., with functions that use the `api.js` Axios instance.
 
-## Styling
+## Styling & Color Palette
 
 Styling is handled exclusively with **Tailwind CSS**.
 
 - Global styles and Tailwind directives are in `src/index.css`.
 - All custom theme settings (colors, fonts) should be added to `tailwind.config.js`.
+
+To maintain a consistent brand identity, please adhere to the primary color palette.
+
+### Primary Color Palette
+
+**Primary (Fuchsia):** Used for all main actions, buttons, and links.
+
+- `bg-fuchsia-600` (Hex: `#DB2777`) - Main buttons
+- `text-fuchsia-600` (Hex: `#DB2777`) - Links
+- `bg-fuchsia-100` (Hex: `#FDF2F8`) - Light backgrounds, highlights
+- `hover:bg-fuchsia-700` (Hex: `#BE185D`) - Button hover state
+- `focus:ring-fuchsia-500` (Hex: `#D946EF`) - Focus rings
+
+**Dark (Gray):** Used for the NavBar, Footer, and Admin pages.
+
+- `bg-gray-900` (Hex: `#111827`) - Main dark background
+- `bg-gray-800` (Hex: `#1F2937`) - Darker accents
+- `text-white` (Hex: `#FFFFFF`) - Text on dark backgrounds
+
+**Neutrals:** Used for page backgrounds, card backgrounds, and body text.
+
+- `bg-gray-100` (Hex: `#F3F4F6`) - Main page background
+- `bg-white` (Hex: `#FFFFFF`) - Card/Modal backgrounds
+- `text-gray-900` (Hex: `#111827`) - Primary body text
+- `text-gray-600` (Hex: `#4B5563`) - Secondary/sub-text
 
 ## Available Scripts
 
